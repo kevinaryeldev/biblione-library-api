@@ -8,7 +8,7 @@ public class BusinessException extends RuntimeException {
 
     private final HttpStatus status;
 
-    public BusinessException(String message, HttpStatus status) {
+    public BusinessException(String message, int status) {
         super(message);
         this.status = status;
     }

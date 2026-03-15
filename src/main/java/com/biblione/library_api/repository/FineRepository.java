@@ -10,11 +10,17 @@ import java.util.UUID;
 
 @Repository
 public interface FineRepository extends JpaRepository<Fine, UUID> {
+
     List<Fine> findByReaderId(UUID readerId);
 
     @Query("SELECT f FROM Fine f WHERE f.reader.id = :readerId AND f.paidAt IS NULL AND f.waivedAt IS NULL")
     List<Fine> findPendingByReaderId(UUID readerId);
 
-    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM Fine f WHERE f.reader.id = :readerId AND f.paidAt IS NULL AND f.waivedAt IS NULL")
-    boolean hasPendingFines(UUID readerId);
+    boolean existsByLoanId(UUID loanId);
+
+    @Query("SELECT DISTINCT f.reader.id FROM Fine f WHERE f.paidAt IS NULL AND f.waivedAt IS NULL")
+    List<UUID> findReaderIdsWithPendingFines();
+
+    @Query("SELECT f FROM Fine f WHERE f.paidAt IS NULL AND f.waivedAt IS NULL")
+    List<Fine> findAllPending();
 }
