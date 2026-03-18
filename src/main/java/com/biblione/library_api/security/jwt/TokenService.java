@@ -12,6 +12,8 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+import static org.apache.hc.core5.http.HttpStatus.SC_UNAUTHORIZED;
+
 @Slf4j
 @Service
 public class TokenService {
@@ -33,7 +35,7 @@ public class TokenService {
             log.warn("Invalid JWT token: {}", ex.getMessage());
             throw new com.biblione.library_api.exception.BusinessException(
                     "Token inválido ou expirado.",
-                    org.springframework.http.HttpStatus.UNAUTHORIZED);
+                    SC_UNAUTHORIZED);
         }
     }
 

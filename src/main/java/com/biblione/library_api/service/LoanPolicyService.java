@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.apache.hc.core5.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
+
 @Service
 @RequiredArgsConstructor
 public class LoanPolicyService {
@@ -18,7 +20,7 @@ public class LoanPolicyService {
         return loanPolicyRepository.findByActiveTrue()
                 .orElseThrow(() -> new BusinessException(
                         "Nenhuma política de empréstimo ativa encontrada.",
-                        HttpStatus.INTERNAL_SERVER_ERROR));
+                        SC_INTERNAL_SERVER_ERROR));
     }
 
     @Transactional
