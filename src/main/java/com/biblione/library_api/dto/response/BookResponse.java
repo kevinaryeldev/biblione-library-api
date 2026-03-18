@@ -14,9 +14,8 @@ public record BookResponse(
         Short publishYear,
         String language,
         Short pages,
-        String synopsis,
         String coverUrl,
-        Set<AuthorResponse> authors,
-        Set<CategoryResponse> categories,
+        Set<String> authors,
+        Set<String> categories,
         OffsetDateTime createdAt
 ) {}

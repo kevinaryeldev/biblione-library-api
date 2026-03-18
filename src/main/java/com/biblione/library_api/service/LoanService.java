@@ -1,5 +1,6 @@
 package com.biblione.library_api.service;
 
+import com.biblione.library_api.domain.event.LoanReturnedEvent;
 import com.biblione.library_api.entity.*;
 import com.biblione.library_api.enums.CopyStatus;
 import com.biblione.library_api.enums.LoanStatus;
@@ -10,6 +11,7 @@ import com.biblione.library_api.repository.CopyRepository;
 import com.biblione.library_api.repository.LoanRepository;
 import com.biblione.library_api.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static org.apache.hc.core5.http.HttpStatus.*;
+import static org.apache.hc.core5.http.HttpStatus.SC_UNPROCESSABLE_CONTENT;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +34,7 @@ public class LoanService {
     private final LoanPolicyService loanPolicyService;
     private final LibraryEventProducer eventProducer;
     private final ReservationRepository reservationRepository;
-    private final ReservationService reservationService;
+    private final ApplicationEventPublisher eventPublisher;
 
 
     public Page<Loan> findAll(Pageable pageable) {
@@ -106,8 +108,7 @@ public class LoanService {
         loanRepository.save(loan);
         eventProducer.publishLoanReturned(buildLoanEventData(loan));
 
-        // notifica próximo na fila se houver reserva
-        reservationService.notifyNextInQueue(copy.getBook().getId());
+        eventPublisher.publishEvent(new LoanReturnedEvent(copy.getBook().getId()));
 
         return loan;
     }
@@ -121,7 +122,6 @@ public class LoanService {
             throw new RenewalNotAllowedException();
         }
 
-        // verifica se existe reserva aguardando para este livro
         UUID bookId = loan.getCopy().getBook().getId();
         boolean hasWaitingReservation = reservationRepository
                 .findWaitingByBookIdOrdered(bookId)

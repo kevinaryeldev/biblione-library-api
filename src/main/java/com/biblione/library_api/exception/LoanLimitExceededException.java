@@ -1,9 +1,9 @@
 package com.biblione.library_api.exception;
 
-import org.springframework.http.HttpStatus;
+import static org.apache.hc.core5.http.HttpStatus.SC_UNPROCESSABLE_CONTENT;
 
 public class LoanLimitExceededException extends BusinessException {
     public LoanLimitExceededException(int limit) {
-        super("Limite de empréstimos simultâneos atingido: " + limit, HttpStatus.UNPROCESSABLE_ENTITY);
+        super("Limite de empréstimos simultâneos atingido: " + limit, SC_UNPROCESSABLE_CONTENT);
     }
 }

@@ -1,15 +1,18 @@
 package com.biblione.library_api.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+
+import static org.apache.hc.core5.http.HttpStatus.SC_BAD_REQUEST;
+import static org.apache.hc.core5.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @RestControllerAdvice
@@ -19,13 +22,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBusinessException(
             BusinessException ex, HttpServletRequest request) {
         log.warn("Business exception at {}: {}", request.getRequestURI(), ex.getMessage());
+        int code = ex.getStatusCode();
+        HttpStatus resolved = HttpStatus.resolve(code);
+        String name = resolved != null ? resolved.name() : String.valueOf(code);
+        String phrase = resolved != null ? resolved.getReasonPhrase() : String.valueOf(code);
         return ResponseEntity
-                .status(ex.getStatus())
-                .body(ErrorResponse.of(
-                        ex.getStatus().name(),
-                        ex.getStatus().getReasonPhrase(),
-                        ex.getMessage()
-                ));
+                .status(code)
+                .body(ErrorResponse.of(name, phrase, ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -42,7 +45,7 @@ public class GlobalExceptionHandler {
                 .toList();
         log.warn("Validation exception at {}: {}", request.getRequestURI(), details);
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(SC_BAD_REQUEST)
                 .body(ErrorResponse.ofValidation(details));
     }
 
@@ -51,7 +54,7 @@ public class GlobalExceptionHandler {
             Exception ex, HttpServletRequest request) {
         log.error("Unexpected error at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .status(SC_INTERNAL_SERVER_ERROR)
                 .body(ErrorResponse.of(
                         "INTERNAL_SERVER_ERROR",
                         "Erro interno",

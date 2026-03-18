@@ -8,7 +8,6 @@ import com.biblione.library_api.kafka.producer.LibraryEventProducer;
 import com.biblione.library_api.repository.FineRepository;
 import com.biblione.library_api.repository.LoanRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

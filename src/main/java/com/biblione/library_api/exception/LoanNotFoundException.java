@@ -1,9 +1,9 @@
 package com.biblione.library_api.exception;
 
-import org.springframework.http.HttpStatus;
+import static org.apache.hc.core5.http.HttpStatus.SC_NOT_FOUND;
 
 public class LoanNotFoundException extends BusinessException {
     public LoanNotFoundException(String id) {
-        super("Empréstimo não encontrado: " + id, HttpStatus.NOT_FOUND);
+        super("Empréstimo não encontrado: " + id, SC_NOT_FOUND);
     }
 }

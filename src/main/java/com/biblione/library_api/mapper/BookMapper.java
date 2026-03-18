@@ -8,22 +8,17 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring", uses = {AuthorMapper.class, CategoryMapper.class},
-        builder = @Builder(disableBuilder = true))
+@Mapper(componentModel = "spring", builder = @Builder(disableBuilder = true))
 public interface BookMapper {
 
     BookResponse toResponse(Book book);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "authors", ignore = true)
-    @Mapping(target = "categories", ignore = true)
     @Mapping(target = "copies", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     Book toEntity(BookRequest request);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "authors", ignore = true)
-    @Mapping(target = "categories", ignore = true)
     @Mapping(target = "copies", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     void updateEntity(BookRequest request, @MappingTarget Book book);

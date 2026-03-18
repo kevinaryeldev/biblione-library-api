@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
 import java.util.Set;
-import java.util.UUID;
 
 public record BookRequest(
         @Size(max = 13) String isbn13,
@@ -16,8 +15,7 @@ public record BookRequest(
         Short publishYear,
         @Size(max = 5) String language,
         Short pages,
-        String synopsis,
         @Size(max = 500) String coverUrl,
-        @NotEmpty Set<UUID> authorIds,
-        @NotEmpty Set<UUID> categoryIds
+        @NotEmpty Set<String> authors,
+        @NotEmpty Set<String> categories
 ) {}

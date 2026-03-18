@@ -1,9 +1,9 @@
 package com.biblione.library_api.exception;
 
-import org.springframework.http.HttpStatus;
+import static org.apache.hc.core5.http.HttpStatus.SC_NOT_FOUND;
 
 public class ReservationNotFoundException extends BusinessException {
     public ReservationNotFoundException(String id) {
-        super("Reserva não encontrada: " + id, HttpStatus.NOT_FOUND);
+        super("Reserva não encontrada: " + id, SC_NOT_FOUND);
     }
 }

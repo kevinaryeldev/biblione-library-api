@@ -1,9 +1,9 @@
 package com.biblione.library_api.exception;
 
-import org.springframework.http.HttpStatus;
+import static org.apache.hc.core5.http.HttpStatus.SC_FORBIDDEN;
 
 public class PendingFinesException extends BusinessException {
     public PendingFinesException() {
-        super("Leitor possui multas pendentes. Regularize sua situação.", HttpStatus.FORBIDDEN);
+        super("Leitor possui multas pendentes. Regularize sua situação.", SC_FORBIDDEN);
     }
 }

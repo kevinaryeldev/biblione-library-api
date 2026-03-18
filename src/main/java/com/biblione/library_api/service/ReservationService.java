@@ -1,11 +1,13 @@
 package com.biblione.library_api.service;
 
+import com.biblione.library_api.domain.event.LoanReturnedEvent;
 import com.biblione.library_api.entity.Copy;
 import com.biblione.library_api.entity.Reader;
 import com.biblione.library_api.entity.Reservation;
 import com.biblione.library_api.enums.CopyStatus;
 import com.biblione.library_api.enums.ReservationStatus;
 import com.biblione.library_api.exception.BookNotFoundException;
+import com.biblione.library_api.exception.BusinessException;
 import com.biblione.library_api.exception.DuplicateReservationException;
 import com.biblione.library_api.exception.ReservationNotFoundException;
 import com.biblione.library_api.kafka.event.ReservationEventData;
@@ -14,6 +16,7 @@ import com.biblione.library_api.repository.BookRepository;
 import com.biblione.library_api.repository.CopyRepository;
 import com.biblione.library_api.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,7 +83,7 @@ public class ReservationService {
 
         if (reservation.getStatus() != ReservationStatus.WAITING &&
                 reservation.getStatus() != ReservationStatus.READY) {
-            throw new com.biblione.library_api.exception.BusinessException(
+            throw new BusinessException(
                     "Reserva não pode ser cancelada.",
                     SC_UNPROCESSABLE_CONTENT);
         }
@@ -89,9 +92,35 @@ public class ReservationService {
         reservationRepository.save(reservation);
     }
 
-    // chamado pelo LoanService na devolução
+    @EventListener
     @Transactional
-    public void notifyNextInQueue(UUID bookId) {
+    public void onLoanReturned(LoanReturnedEvent event) {
+        notifyNextInQueue(event.bookId());
+    }
+
+    // chamado pela job e pelo evento de devolução
+    @Transactional
+    public void expireReadyReservations() {
+        reservationRepository.findExpiredReady(OffsetDateTime.now())
+                .forEach(reservation -> {
+                    reservation.setStatus(ReservationStatus.EXPIRED);
+                    reservationRepository.save(reservation);
+
+                    copyRepository.findByBookIdAndStatus(
+                                    reservation.getBook().getId(), CopyStatus.RESERVED)
+                            .stream()
+                            .findFirst()
+                            .ifPresent(copy -> {
+                                copy.setStatus(CopyStatus.AVAILABLE);
+                                copyRepository.save(copy);
+                            });
+
+                    eventProducer.publishReservationExpired(buildReservationEventData(reservation));
+                    notifyNextInQueue(reservation.getBook().getId());
+                });
+    }
+
+    private void notifyNextInQueue(UUID bookId) {
         reservationRepository.findWaitingByBookIdOrdered(bookId)
                 .stream()
                 .findFirst()
@@ -111,28 +140,6 @@ public class ReservationService {
                             });
 
                     eventProducer.publishReservationReady(buildReservationEventData(reservation));
-                });
-    }
-
-    // chamado pela job
-    @Transactional
-    public void expireReadyReservations() {
-        reservationRepository.findExpiredReady(OffsetDateTime.now())
-                .forEach(reservation -> {
-                    reservation.setStatus(ReservationStatus.EXPIRED);
-                    reservationRepository.save(reservation);
-
-                    copyRepository.findByBookIdAndStatus(
-                                    reservation.getBook().getId(), CopyStatus.RESERVED)
-                            .stream()
-                            .findFirst()
-                            .ifPresent(copy -> {
-                                copy.setStatus(CopyStatus.AVAILABLE);
-                                copyRepository.save(copy);
-                            });
-
-                    eventProducer.publishReservationExpired(buildReservationEventData(reservation));
-                    notifyNextInQueue(reservation.getBook().getId());
                 });
     }
 

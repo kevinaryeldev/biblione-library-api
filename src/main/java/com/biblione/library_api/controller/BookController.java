@@ -50,17 +50,13 @@ public class BookController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
     public BookResponse create(@Valid @RequestBody BookRequest request) {
-        return bookMapper.toResponse(
-                bookService.create(bookMapper.toEntity(request), request.authorIds(), request.categoryIds())
-        );
+        return bookMapper.toResponse(bookService.create(bookMapper.toEntity(request)));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public BookResponse update(@PathVariable UUID id, @Valid @RequestBody BookRequest request) {
-        return bookMapper.toResponse(
-                bookService.update(id, bookMapper.toEntity(request), request.authorIds(), request.categoryIds())
-        );
+        return bookMapper.toResponse(bookService.update(id, bookMapper.toEntity(request)));
     }
 
     @PostMapping("/{id}/copies")

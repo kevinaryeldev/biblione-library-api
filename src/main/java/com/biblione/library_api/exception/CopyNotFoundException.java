@@ -1,9 +1,9 @@
 package com.biblione.library_api.exception;
 
-import org.springframework.http.HttpStatus;
+import static org.apache.hc.core5.http.HttpStatus.SC_NOT_FOUND;
 
 public class CopyNotFoundException extends BusinessException {
     public CopyNotFoundException(String id) {
-        super("Exemplar não encontrado: " + id, HttpStatus.NOT_FOUND);
+        super("Exemplar não encontrado: " + id, SC_NOT_FOUND);
     }
 }

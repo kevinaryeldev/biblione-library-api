@@ -45,29 +45,20 @@ public class Book {
 
     private Short pages;
 
-    @Column(columnDefinition = "text")
-    private String synopsis;
-
     @Column(name = "cover_url", length = 500)
     private String coverUrl;
 
-    @ManyToMany
-    @JoinTable(
-            name = "book_authors",
-            joinColumns = @JoinColumn(name = "book_id"),
-            inverseJoinColumns = @JoinColumn(name = "author_id")
-    )
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "book_authors", joinColumns = @JoinColumn(name = "book_id"))
+    @Column(name = "author_name", length = 200)
     @Builder.Default
-    private Set<Author> authors = new HashSet<>();
+    private Set<String> authors = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "book_categories",
-            joinColumns = @JoinColumn(name = "book_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "book_categories", joinColumns = @JoinColumn(name = "book_id"))
+    @Column(name = "category_name", length = 80)
     @Builder.Default
-    private Set<Category> categories = new HashSet<>();
+    private Set<String> categories = new HashSet<>();
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

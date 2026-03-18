@@ -1,9 +1,9 @@
 package com.biblione.library_api.exception;
 
-import org.springframework.http.HttpStatus;
+import static org.apache.hc.core5.http.HttpStatus.SC_NOT_FOUND;
 
 public class ReaderNotFoundException extends BusinessException {
     public ReaderNotFoundException(String id) {
-        super("Leitor não encontrado: " + id, HttpStatus.NOT_FOUND);
+        super("Leitor não encontrado: " + id, SC_NOT_FOUND);
     }
 }

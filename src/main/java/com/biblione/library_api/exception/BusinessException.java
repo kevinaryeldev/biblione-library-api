@@ -1,20 +1,14 @@
 package com.biblione.library_api.exception;
 
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 @Getter
 public class BusinessException extends RuntimeException {
 
-    private final HttpStatus status;
+    private final int statusCode;
 
-    public BusinessException(String message, int status) {
+    public BusinessException(String message, int statusCode) {
         super(message);
-        this.status = HttpStatus.resolve(status) != null ? HttpStatus.resolve(status) : HttpStatus.INTERNAL_SERVER_ERROR;
-    }
-
-    public BusinessException(String message, HttpStatus status) {
-        super(message);
-        this.status = status;
+        this.statusCode = statusCode;
     }
 }
